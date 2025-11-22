@@ -1,3 +1,3 @@
 library;
 
-export 'src/jaspr_mermaid.dart';
+export 'src/mermaid.dart';

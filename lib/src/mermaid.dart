@@ -1,7 +1,28 @@
+import 'dart:io';
+
 import 'package:jaspr/server.dart';
-import 'package:syntax_highlight_lite/syntax_highlight_lite.dart';
 import 'package:jaspr_content/jaspr_content.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:syntax_highlight_lite/syntax_highlight_lite.dart';
+
+class MermaidRender {
+  const MermaidRender._();
+  static final MermaidRender _instance = MermaidRender._();
+  static const _command = 'mmdc';
+  static const _arguments = <String>['--input', '-'];
+
+  factory MermaidRender() {
+    return _instance;
+  }
+
+  void subProcess(String mermaidString) async {
+    final proc = await Process.start(_command, _arguments);
+    mermaidString
+        .split('\n')
+        .forEach((String line) => proc.stdin.writeln(line));
+    proc.stdin.close();
+  }
+}
 
 class MermaidBlock extends CustomComponent {
   MermaidBlock({
@@ -70,19 +91,6 @@ class MermaidBlockSyntax extends md.BlockSyntax {
   }
 }
 
-class MermaidStaticComponent extends StatelessComponent {
-  final String mermaidString;
-  const MermaidStaticComponent({super.key, required this.mermaidString});
-  @override
-  Component build(BuildContext context) {
-    print("DEF: $mermaidString");
-    // return pre(classes: ('mermaid'), [text(component.definition.toString())]);
-    // TODO:
-    // return svg([]);
-    return text(mermaidString);
-  }
-}
-
 class MermaidParser extends MarkdownParser {
   const MermaidParser();
 
@@ -95,4 +103,21 @@ class MermaidParser extends MarkdownParser {
       ],
     );
   };
+}
+
+class MermaidStaticComponent extends StatelessComponent {
+  final String mermaidString;
+  const MermaidStaticComponent({super.key, required this.mermaidString});
+  @override
+  Component build(BuildContext context) {
+    final MermaidRender mermaidRender = .new();
+    print("MERMAID: $mermaidString\n\n");
+    print("MERMAID: Rendering svg elements");
+    mermaidRender.subProcess(mermaidString);
+    // return pre(classes: ('mermaid'), [text(component.definition.toString())]);
+    // TODO:
+    // return svg([]);
+
+    return text(mermaidString);
+  }
 }
