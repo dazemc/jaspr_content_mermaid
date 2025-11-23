@@ -12,6 +12,7 @@ dependencies:
   jaspr: ^0.21.7
   jaspr_content: ^0.4.4
   syntax_highlight_lite: ^0.0.1
+  uuid: ^4.5.2
 
 dev_dependencies:
   lints: ^6.0.0

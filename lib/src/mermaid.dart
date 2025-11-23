@@ -4,26 +4,27 @@ import 'package:jaspr/server.dart';
 import 'package:jaspr_content/jaspr_content.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:syntax_highlight_lite/syntax_highlight_lite.dart';
+import 'package:uuid/uuid.dart';
 
 class MermaidRender {
   //TODO: hash/cache svg
   MermaidRender._();
   static final MermaidRender _instance = MermaidRender._();
   static const _command = 'mmdc';
-  static const _arguments = <String>[
-    '--input',
-    '-',
-    '-o',
-    './web/images/out.svg',
-  ];
-  late String svg;
 
   factory MermaidRender() {
     return _instance;
   }
 
-  void subProcess(String mermaidString) async {
-    final proc = await Process.start(_command, _arguments);
+  void subProcess(String mermaidString, String uuid) async {
+    //TODO: ./web/images might not be the best location for this
+    final List<String> arguments = <String>[
+      '--input',
+      '-',
+      '-o',
+      './web/images/$uuid.svg',
+    ];
+    final proc = await Process.start(_command, arguments);
     mermaidString
         .split('\n')
         .forEach((String line) => proc.stdin.writeln(line));
@@ -118,12 +119,22 @@ class MermaidStaticComponent extends StatelessComponent {
   @override
   Component build(BuildContext context) {
     final MermaidRender mermaidRender = .new();
-    print("MERMAID: $mermaidString\n\n");
+    final String uuid = mermaidString.hashCode.toString();
+    print(mermaidString.hashCode);
+    // print("MERMAID: $mermaidString\n\n");
     print("MERMAID: Rendering svg elements");
-    mermaidRender.subProcess(mermaidString);
+    final String location = './images/$uuid.svg';
+    final File file = .new('./web/$location');
+    print(file.path);
+    if (file.existsSync()) {
+      print("reusing mermaid svg: $uuid");
+    } else {
+      mermaidRender.subProcess(mermaidString, uuid);
+    }
+
     // return pre(classes: ('mermaid'), [text(component.definition.toString())]);
     // TODO: make a better svg lib
-    return img(src: './images/out.svg');
+    return img(src: location);
 
     return text(mermaidString);
   }
