@@ -1,102 +1,57 @@
 import 'dart:io';
 
 import 'package:jaspr/server.dart';
+import 'package:html/parser.dart' show parse;
+import 'package:html/dom.dart' as dom;
 import 'package:jaspr_content/jaspr_content.dart';
-import 'package:markdown/markdown.dart' as md;
-import 'package:syntax_highlight_lite/syntax_highlight_lite.dart';
 import 'mermaid_render.dart';
 
-class MermaidBlock extends CustomComponent {
-  MermaidBlock({
-    this.defaultLanguage = 'mermaid',
-    this.grammars = const {},
-    this.codeTheme,
-  }) : super.base();
-
-  static Component from({required String source, Key? key}) {
-    return MermaidStaticComponent(key: key, mermaidString: 'test');
-  }
-
-  /// The default language for the code block.
-  final String defaultLanguage;
-
-  /// The available grammars for the code block.
-  ///
-  /// The key is the name of the language.
-  /// The value is a json encoded string of the grammar.
-  final Map<String, String> grammars;
-
-  /// The default theme for the code block.
-  final HighlighterTheme? codeTheme;
-
-  bool _initialized = false;
-  HighlighterTheme? _defaultTheme;
+class MermaidExtension extends PageExtension {
+  MermaidExtension();
 
   @override
-  Component? create(Node node, NodesBuilder builder) {
-    if (node case ElementNode(tag: 'mermaid')) {
-      return AsyncBuilder(
-        builder: (context) async {
-          return MermaidStaticComponent(mermaidString: node.innerText);
-        },
-      );
+  Future<List<Node>> apply(Page page, List<Node> nodes) async {
+    return [for (final node in nodes) await _processNode(node)];
+  }
+
+  Future<Node> _processNode(Node node) async {
+    switch (node) {
+      case TextNode():
+        break;
+      case ElementNode():
+        final first = node.children?.first;
+        if (first is ElementNode) {
+          if (first.attributes.containsValue('language-mermaid')) {
+            final mermaidString = _unescapeHtml(first.innerText);
+            return ComponentNode(
+              MermaidComponent(mermaidString: mermaidString),
+            );
+          }
+        }
+        break;
+      case ComponentNode():
+        break;
     }
-    return null;
+    return node;
+  }
+
+  String _unescapeHtml(String htmlText) {
+    final document = parse(htmlText);
+    final String decoded = document.body?.text ?? document.text ?? "";
+    return decoded;
   }
 }
 
-class MermaidBlockSyntax extends md.BlockSyntax {
-  @override
-  RegExp get pattern => RegExp(r'^```mermaid\s*$');
-
-  @override
-  bool canParse(md.BlockParser parser) {
-    return pattern.hasMatch(parser.current.content);
-  }
-
-  @override
-  md.Node parse(md.BlockParser parser) {
-    parser.advance();
-
-    final buffer = StringBuffer();
-
-    // Collect lines until ```
-    while (!parser.isDone && !parser.current.content.startsWith('```')) {
-      buffer.writeln(parser.current.content);
-      parser.advance();
-    }
-
-    if (!parser.isDone) parser.advance();
-
-    return md.Element('mermaid', [md.Text(buffer.toString().trim())])
-      ..attributes['definition'] = buffer.toString().trim();
-  }
-}
-
-class MermaidParser extends MarkdownParser {
-  const MermaidParser();
-
-  @override
-  DocumentBuilder get documentBuilder => (Page page) {
-    return md.Document(
-      blockSyntaxes: [
-        ...MarkdownParser.defaultBlockSyntaxes,
-        MermaidBlockSyntax(),
-      ],
-    );
-  };
-}
-
-class MermaidStaticComponent extends StatelessComponent {
+class MermaidComponent extends AsyncStatelessComponent {
   final String mermaidString;
-  const MermaidStaticComponent({super.key, required this.mermaidString});
+  const MermaidComponent({super.key, required this.mermaidString});
   @override
-  Component build(BuildContext context) {
+  Future<Component> build(BuildContext context) async {
     final MermaidRender mermaidRender = .new();
     final String uuid = fastHash(mermaidString).toString();
     final String svgDir = 'images/mermaid/$uuid.svg';
     final File file = kDebugMode ? .new('./web/$svgDir') : .new(svgDir);
-    if (!file.existsSync()) {
+    if (!await file.exists()) {
       mermaidRender.subProcess(mermaidString, uuid);
     }
     //TODO: return as svg

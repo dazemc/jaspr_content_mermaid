@@ -37,7 +37,6 @@ void main() {
       // Enables mustache templating inside the markdown files.
       templateEngine: MustacheTemplateEngine(),
       parsers: [
-        MermaidParser(),
         MarkdownParser(),
       ],
       extensions: [
@@ -45,18 +44,18 @@ void main() {
         HeadingAnchorsExtension(),
         // Generates a table of contents for each page.
         TableOfContentsExtension(),
+        MermaidExtension(),
       ],
       components: [
-        MermaidBlock(),
         // The <Info> block and other callouts.
-        Callout(),
+        // Callout(),
         // Adds syntax highlighting to code blocks.
-        CodeBlock(),
+        // CodeBlock(),
         // Adds a custom Jaspr component to be used as <Clicker/> in markdown.
-        CustomComponent(
-          pattern: 'Clicker',
-          builder: (_, __, ___) => Clicker(),
-        ),
+        // CustomComponent(
+        // pattern: 'Clicker',
+        // builder: (_, __, ___) => Clicker(),
+        // ),
         // Adds zooming and caption support to images.
         Image(zoom: true),
       ],
