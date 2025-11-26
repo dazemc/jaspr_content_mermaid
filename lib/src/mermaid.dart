@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:jaspr/server.dart';
 import 'package:html/parser.dart' show parse;
-import 'package:html/dom.dart' as dom;
 import 'package:jaspr_content/jaspr_content.dart';
+import 'package:xml/xml.dart';
 import 'mermaid_render.dart';
 
 class MermaidExtension extends PageExtension {
@@ -54,7 +54,39 @@ class MermaidComponent extends AsyncStatelessComponent {
     if (!await file.exists()) {
       mermaidRender.subProcess(mermaidString, uuid);
     }
-    //TODO: return as svg
     return img(src: svgDir);
+    //TODO: return svg
+    final component = await _loadSvg(file);
+    if (component != null) {
+      // return component;
+    } else {
+      return text(
+        "Error processing svg file for mermaid diagram: $uuid\n$mermaidString",
+      );
+    }
+  }
+
+  Future<Component?> _loadSvg(File file) async {
+    final svgContent = await file.readAsString();
+    final document = XmlDocument.parse(svgContent);
+    final svgElement = document.findAllElements('svg').first;
+    // final width = svgElement.getAttribute('width');
+    // final height = svgElement.getAttribute('height');
+    final viewBox = svgElement.getAttribute('viewBox');
+    final attributes = <String, String>{};
+
+    for (final attr in svgElement.attributes) {
+      if (!["width", "height", "viewBox"].contains(attr.name.local)) {
+        attributes[attr.name.local] = attr.value;
+      }
+    }
+
+    return svg(
+      width: Unit.percent(100),
+      height: Unit.percent(100),
+      viewBox: viewBox,
+      attributes: attributes,
+      [],
+    );
   }
 }
