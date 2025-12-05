@@ -15,7 +15,7 @@ Future<Node> processNode(
       if (first is ElementNode) {
         if (first.attributes.containsValue(language)) {
           // _createMermaidNode(first);
-          function(first);
+          return function(first);
         }
       }
       break;
@@ -26,6 +26,7 @@ Future<Node> processNode(
 }
 
 ComponentNode mermaidNode(Node node) {
+  print("Mermaid node: $node");
   final mermaidString = _unescapeHtml(node.innerText);
   return ComponentNode(MermaidComponent(mermaidString: mermaidString));
 }
