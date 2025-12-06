@@ -48,9 +48,9 @@ void main() {
       ],
       components: [
         // The <Info> block and other callouts.
-        // Callout(),
+        Callout(),
         // Adds syntax highlighting to code blocks.
-        // CodeBlock(),
+        CodeBlock(),
         // Adds a custom Jaspr component to be used as <Clicker/> in markdown.
         // CustomComponent(
         // pattern: 'Clicker',
