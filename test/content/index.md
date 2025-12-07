@@ -3,6 +3,13 @@ title: Welcome to Your New Docs Site!
 description: A placeholder page for your new documentation site.
 ---
 
+```dart
+echo "testing"
+ls
+
+```
+
+
 ```mermaid
 %%{init: { 'theme': 'dark' } }%%
 graph TD

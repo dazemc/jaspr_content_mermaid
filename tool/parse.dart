@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 void main() async {
-  final genDir = await Directory("generated").create();
+  final genDir = await Directory("../lib/src/").create();
   final rootDirPath = '../src/vscode/extensions/';
   final extDir = Directory(rootDirPath);
   final jsonFileList = await extDir.exists()
@@ -38,15 +38,23 @@ String formatName(String name) {
 }
 
 String getExtensionHeader(String title) {
-  return '''
+  return r'''
+import 'dart:isolate';
 import 'dart:io';
 
 class Grammar {
   const Grammar();
   }
 
-extension $title on Grammar {
-''';
+String loadGrammar(String fileName) {
+  final file = Isolate.resolvePackageUriSync(
+    Uri.parse("package:jaspr_content_ext/src/json/$fileName"),
+  );
+  return File(file!.path).readAsStringSync();
+  }
+  
+  ''' +
+      'extension $title on Grammar {';
 }
 
 String generateGrammarExtension(
@@ -58,9 +66,8 @@ String generateGrammarExtension(
   final footer = "  }";
   for (var name in uniqueNameList) {
     final current = jsonList.firstWhere((e) => e["name"] == name);
-    final file = File("json/${current["fileName"]}");
-    body +=
-        '''    String get ${formatName(name)} => File("${file.path}").readAsStringSync();\n''';
+    final file = "loadGrammar('${current["fileName"]}')";
+    body += '''    String get ${formatName(name)} => $file;\n''';
   }
   return "$header$body$footer";
 }
@@ -91,10 +98,13 @@ Future<List<Map>> decodeJsonList(List<File> jsonFileList) async {
               ).readAsString(),
             )
             as Map;
-    final langName =
-        (packageJson["contributes"]["languages"] as List).first["id"];
+    final langName = packageJson["name"];
     final langJson = jsonDecode(await json.readAsString());
-    final fileName = json.path.substring(json.parent.path.length + 1);
+    final fileName =
+        (((packageJson["contributes"]["grammars"] as List).first as Map)["path"]
+                as String)
+            .split('/')
+            .last;
     jsonList.add({"name": langName, "fileName": fileName, "content": langJson});
   }
   return jsonList;

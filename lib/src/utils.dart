@@ -30,12 +30,6 @@ ComponentNode mermaidNode(Node node) {
   return ComponentNode(MermaidComponent(mermaidString: mermaidString));
 }
 
-//TODO:
-// ComponentNode consoleNode(Node node) {
-//   final consoleString = _unescapeHtml(node.innerText);
-//   return ComponentNode(ConsoleComponent());
-//   }
-
 String _unescapeHtml(String htmlText) {
   final document = parse(htmlText);
   final String decoded = document.body?.text ?? document.text ?? "";

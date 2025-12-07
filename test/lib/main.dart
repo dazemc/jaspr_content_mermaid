@@ -23,6 +23,7 @@ import 'components/clicker.dart';
 import 'jaspr_options.dart';
 
 void main() {
+  final grammars = Grammar();
   // Initializes the server environment with the generated default options.
   Jaspr.initializeApp(
     options: defaultJasprOptions,
@@ -50,7 +51,7 @@ void main() {
         // The <Info> block and other callouts.
         Callout(),
         // Adds syntax highlighting to code blocks.
-        CodeBlock(),
+        CodeBlock(grammars: {"dart": grammars.dart}),
         // Adds a custom Jaspr component to be used as <Clicker/> in markdown.
         // CustomComponent(
         // pattern: 'Clicker',
