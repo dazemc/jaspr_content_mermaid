@@ -9,7 +9,7 @@ dependencies:
   jaspr: ^0.22.0
   jaspr_content: ^0.4.4
   jaspr_router: ^0.8.0
-  jaspr_content_ext:
+  jaspr_mermaid:
     path: ../
 
 dev_dependencies:
@@ -22,9 +22,3 @@ dev_dependencies:
 jaspr:
   mode: static
   
-dependency_overrides:
-  syntax_highlight_lite:
-    # path: ../../lcov_format/packages/syntax_highlight_lite/
-    path: lcov_format_self_sub/packages/syntax_highlight_lite/
-  # duppix:
-  #   path: ../../duppix/

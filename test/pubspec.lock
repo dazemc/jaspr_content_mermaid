@@ -393,13 +393,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.5"
-  jaspr_content_ext:
-    dependency: "direct main"
-    description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.0.1"
   jaspr_lints:
     dependency: "direct dev"
     description:
@@ -408,6 +401,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.1"
+  jaspr_mermaid:
+    dependency: "direct main"
+    description:
+      path: ".."
+      relative: true
+    source: path
+    version: "0.0.1"
   jaspr_router:
     dependency: "direct main"
     description:
@@ -673,11 +673,12 @@ packages:
     source: hosted
     version: "1.4.1"
   syntax_highlight_lite:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: "lcov_format_self_sub/packages/syntax_highlight_lite"
-      relative: true
-    source: path
+      name: syntax_highlight_lite
+      sha256: ff54f69159263e26b843c64a2dc556ac7bbbc66690eb6d500aefb341cf4957a0
+      url: "https://pub.dev"
+    source: hosted
     version: "0.0.1"
   term_glyph:
     dependency: transitive
